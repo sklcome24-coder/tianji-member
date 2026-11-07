@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>經方自學會員</title>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>
+:root{--bg:#faf8f5;--card:#fff;--ink:#292524;--muted:#78716c;--line:#e7e5e4;--brand:#7c2d12;--brand2:#9a3412;--ok:#166534;--warn:#b45309;--bad:#b91c1c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 "Noto Serif TC","PingFang TC","Microsoft JhengHei",serif}
+a{color:var(--brand2)}
+header{background:var(--brand);color:#fff}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;padding-bottom:12px;flex-wrap:wrap}
+.top h1{font-size:20px;margin:0;letter-spacing:2px}
+.top nav{display:flex;gap:8px;flex-wrap:wrap}
+button,.btn{font:inherit;border:1px solid var(--brand);background:var(--brand);color:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;text-decoration:none;display:inline-block}
+button.ghost,.btn.ghost{background:transparent;color:var(--brand)}
+header button.ghost{color:#fff;border-color:#fff}
+button:disabled{opacity:.5;cursor:default}
+section{margin:24px 0}
+h2{font-size:18px;border-left:4px solid var(--brand);padding-left:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.card h3{margin:0 0 6px;font-size:17px}
+.muted{color:var(--muted);font-size:13px}
+.tag{display:inline-block;font-size:12px;border-radius:99px;padding:1px 8px;background:#fef3c7;color:#92400e;margin-left:4px}
+.tag.ok{background:#dcfce7;color:var(--ok)}
+.notice{border-radius:10px;padding:10px 14px;margin:12px 0;background:#fff7ed;border:1px solid #fed7aa}
+.notice.ok{background:#f0fdf4;border-color:#bbf7d0}
+.notice.bad{background:#fef2f2;border-color:#fecaca}
+.price{font-size:26px;font-weight:700;color:var(--brand)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left;vertical-align:top}
+.table-wrap{overflow-x:auto}
+dialog{border:none;border-radius:14px;padding:20px;max-width:440px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+label{display:block;margin:10px 0 4px;font-size:14px}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=search]{width:100%;font:inherit;padding:8px 10px;border:1px solid #d6d3d1;border-radius:8px}
+.check{display:flex;gap:8px;align-items:flex-start;margin:8px 0;font-size:14px}
+.check input{margin-top:6px}
+.row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.err{color:var(--bad);font-size:13px;min-height:1em;margin-top:6px}
+.bar{height:8px;background:#e7e5e4;border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--brand2)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stats .card{padding:10px 12px}
+.stats b{display:block;font-size:20px;color:var(--brand)}
+footer{border-top:1px solid var(--line);margin-top:40px;padding:20px 0 40px;font-size:13px;color:var(--muted)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header><div class="wrap top">
+  <h1>經方自學會員</h1>
+  <nav id="nav"></nav>
+</div></header>
+
+<main class="wrap">
+  <div id="flash"></div>
+
+  <section>
+    <p>以倪海廈老師的經方與天紀體系為學習主軸，整理排盤、卦象、經方辨證與知識庫 AI 問答，供自學者研讀與練習。</p>
+    <div class="notice"><b>⚕ 學習用途聲明：</b>本站所有內容與工具為<strong>學習輔助</strong>，不是醫療行為，不提供診斷或處方。任何用藥須經合格中醫師當面診察後決定；孕婦、慢性病與服用西藥者尤須告知醫師。胸痛、呼吸困難、中風徵兆等急症請直接撥打 119。</div>
+  </section>
+
+  <section>
+    <h2>學習工具</h2>
+    <div class="grid">
+      <div class="card"><h3>🌿 經方辨證</h3><p class="muted">六經辨證、經方條文對照、醫案練習。可產出「醫師參考文件」交給合格中醫師覆核。</p><a class="btn" href="/tools/jingfang.html">進入</a> <span class="tag">需簽同意書</span></div>
+      <div class="card"><h3>🔮 天紀紫微・易卦</h3><p class="muted">紫微斗數排盤解讀、六十四卦、梅花易數。</p><a class="btn" href="/tools/ziwei.html">進入</a></div>
+      <div class="card"><h3>🧭 玄空星卦合參</h3><p class="muted">三元九運飛星排盤、替卦兼向、分金。</p><a class="btn" href="/tools/xuankong.html">進入</a></div>
+      <div class="card"><h3>🪙 六爻禪解</h3><p class="muted">六爻起卦、用神取法、應期推算。</p><a class="btn" href="/tools/liuyao.html">進入</a></div>
+    </div>
+    <p class="muted">排盤、起卦等計算功能註冊即可使用；連接知識庫的 AI 解讀依會員等級有每日次數。玄空與六爻傳承自混元禪師，不屬倪師體系，特此分列。</p>
+  </section>
+
+  <section id="me" class="hidden"></section>
+
+  <section id="plans">
+    <h2>會員方案</h2>
+    <div class="grid" id="planCards"></div>
+    <p class="muted" id="planNote"></p>
+  </section>
+
+  <section id="admin" class="hidden"></section>
+
+  <section id="terms">
+    <h2>服務條款摘要</h2>
+    <ol class="muted">
+      <li>本站費用為「系統使用與 AI 知識庫運算」之服務費，不販售個別處方、診斷或療效保證。</li>
+      <li>AI 回覆可能有誤，僅供學習參考；依回覆自行用藥之風險由使用者自負，本站建議一律經合格中醫師確認。</li>
+      <li>經方工具的問診內容與病歷紀錄只存在您自己的瀏覽器，本站伺服器不保存；換裝置或清除瀏覽資料會遺失，請自行匯出。</li>
+      <li>倪海廈老師之教學著作權歸原權利人所有，本站僅為學習整理並敘明出處；權利人如有異議，請來信，本站將立即處理。</li>
+      <li>付費方案到期不自動續扣；退費依消費者保護法及本站退費政策辦理（退費政策請於上線前補上）。</li>
+    </ol>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  謹向倪海廈醫師致敬。內容為學習參考，不構成診療或處方，就醫請諮詢合格醫師。
+</div></footer>
+
+<dialog id="dlgLogin"><form method="dialog" onsubmit="return false">
+  <h3>登入</h3>
+  <label>Email</label><input type="email" id="liEmail" autocomplete="email">
+  <label>密碼</label><input type="password" id="liPw" autocomplete="current-password">
+  <div class="err" id="liErr"></div>
+  <div class="row"><button class="ghost" type="button" onclick="openDlg('dlgForgot')">忘記密碼</button><button class="ghost" type="button" onclick="openDlg('dlgReg')">註冊</button><button type="button" onclick="doLogin()">登入</button></div>
+</form></dialog>
+
+<dialog id="dlgReg"><form method="dialog" onsubmit="return false">
+  <h3>註冊會員（免費）</h3>
+  <label>稱呼</label><input type="text" id="rgName" maxlength="40">
+  <label>Email</label><input type="email" id="rgEmail" autocomplete="email">
+  <label>密碼（至少 8 碼，含英文與數字）</label><input type="password" id="rgPw" autocomplete="new-password">
+  <div class="check"><input type="checkbox" id="rgAgree"><span>我已閱讀並同意<a href="#terms" onclick="closeAll()">服務條款</a>，了解本站為學習用途，不提供醫療診斷。</span></div>
+  <div class="err" id="rgErr"></div>
+  <div class="row"><button class="ghost" type="button" onclick="closeAll()">取消</button><button type="button" onclick="doRegister()">註冊</button></div>
+</form></dialog>
+
+<dialog id="dlgForgot"><form method="dialog" onsubmit="return false">
+  <h3>忘記密碼</h3>
+  <label>註冊時的 Email</label><input type="email" id="fgEmail">
+  <div class="err" id="fgErr"></div>
+  <div class="row"><button class="ghost" type="button" onclick="closeAll()">取消</button><button type="button" onclick="doForgot()">寄送重設連結</button></div>
+</form></dialog>
+
+<dialog id="dlgReset"><form method="dialog" onsubmit="return false">
+  <h3>設定新密碼</h3>
+  <label>新密碼（至少 8 碼，含英文與數字）</label><input type="password" id="rsPw" autocomplete="new-password">
+  <label>再輸入一次</label><input type="password" id="rsPw2" autocomplete="new-password">
+  <div class="err" id="rsErr"></div>
+  <div class="row"><button type="button" onclick="doReset()">確認</button></div>
+</form></dialog>
+
+<dialog id="dlgConsent"><form method="dialog" onsubmit="return false">
+  <h3>經方辨證・學習用途同意書</h3>
+  <p class="muted">使用經方辨證工具前，請逐項確認：</p>
+  <div class="check"><input type="checkbox" id="cs1"><span>我了解本工具為<b>經方教學輔助</b>，不是醫療行為，AI 回覆不是診斷或處方。</span></div>
+  <div class="check"><input type="checkbox" id="cs2"><span>任何用藥我會先請<b>合格中醫師</b>當面診察確認；孕婦、慢性病、服用西藥者會主動告知醫師。</span></div>
+  <div class="check"><input type="checkbox" id="cs3"><span>遇到胸痛、呼吸困難、中風徵兆、高燒不退等急症，我會<b>直接就醫或撥打 119</b>，不使用本工具代替。</span></div>
+  <div class="err" id="csErr"></div>
+  <div class="row"><button class="ghost" type="button" onclick="closeAll()">取消</button><button type="button" onclick="doConsent()">同意並進入</button></div>
+</form></dialog>
+
+<dialog id="dlgPw"><form method="dialog" onsubmit="return false">
+  <h3>變更密碼</h3>
+  <label>舊密碼</label><input type="password" id="pwOld" autocomplete="current-password">
+  <label>新密碼</label><input type="password" id="pwNew" autocomplete="new-password">
+  <div class="err" id="pwErr"></div>
+  <div class="row"><button class="ghost" type="button" onclick="closeAll()">取消</button><button type="button" onclick="doChangePw()">確認</button></div>
+</form></dialog>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate = s => s ? new Date(s).toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei' }) : '—';
+const params = new URLSearchParams(location.search);
+let me = null, planInfo = null, resetToken = null;
+
+async function api(path, body) {
+  const opt = body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+  const r = await fetch(path, opt);
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || '發生錯誤，請稍後再試');
+  return d;
+}
+function flash(msg, kind = '') { $('flash').innerHTML = `<div class="notice ${kind}">${msg}</div>`; }
+function openDlg(id) { closeAll(); const d = $(id); d.showModal(); const f = d.querySelector('input'); if (f) f.focus(); }
+function closeAll() { document.querySelectorAll('dialog[open]').forEach(d => d.close()); }
+function safeNext() { const n = params.get('next') || ''; return /^\/tools\/[a-z]+\.html$/.test(n) ? n : null; }
+function cleanUrl() { history.replaceState(null, '', location.pathname + location.hash); }
+
+async function doLogin() {
+  try {
+    const d = await api('/api/login', { email: $('liEmail').value, password: $('liPw').value });
+    me = d.user; closeAll(); afterAuth();
+  } catch (e) { $('liErr').textContent = e.message; }
+}
+async function doRegister() {
+  try {
+    const d = await api('/api/register', { name: $('rgName').value, email: $('rgEmail').value, password: $('rgPw').value, agreeTerms: $('rgAgree').checked });
+    me = d.user; closeAll();
+    flash('註冊完成！驗證信已寄出，請到信箱點連結完成驗證（找不到請看垃圾郵件匣）。', 'ok');
+    afterAuth();
+  } catch (e) { $('rgErr').textContent = e.message; }
+}
+async function doForgot() {
+  try { await api('/api/forgot-password', { email: $('fgEmail').value }); closeAll(); flash('若此 Email 已註冊，重設連結已寄出（1 小時內有效，請一併查看垃圾郵件匣）。', 'ok'); }
+  catch (e) { $('fgErr').textContent = e.message; }
+}
+async function doReset() {
+  if ($('rsPw').value !== $('rsPw2').value) return $('rsErr').textContent = '兩次輸入不一致';
+  try { await api('/api/reset-password', { token: resetToken, password: $('rsPw').value }); closeAll(); flash('密碼已更新，請重新登入。', 'ok'); openDlg('dlgLogin'); }
+  catch (e) { $('rsErr').textContent = e.message; }
+}
+async function doConsent() {
+  try {
+    await api('/api/me/tcm-consent', { notMedical: $('cs1').checked, seeDoctor: $('cs2').checked, emergency: $('cs3').checked });
+    location.href = safeNext() || '/tools/jingfang.html';
+  } catch (e) { $('csErr').textContent = e.message; }
+}
+async function doChangePw() {
+  try { await api('/api/me/password', { oldPassword: $('pwOld').value, newPassword: $('pwNew').value }); closeAll(); flash('密碼已變更，其他裝置的登入已自動登出。', 'ok'); }
+  catch (e) { $('pwErr').textContent = e.message; }
+}
+async function logout() { await api('/api/logout', {}); me = null; render(); }
+async function resend() {
+  try { await api('/api/me/resend-verify', {}); flash('驗證信已重新寄出。', 'ok'); } catch (e) { flash(esc(e.message), 'bad'); }
+}
+async function buy(plan) {
+  if (!me) return openDlg('dlgLogin');
+  if (!me.emailVerified) return flash('請先完成 Email 驗證再購買。<button class="ghost" onclick="resend()">重寄驗證信</button>', 'bad');
+  try {
+    const d = await api('/api/orders', { plan });
+    if (d.devSimulate && confirm(`開發模式：要直接模擬付款完成嗎？\n（按取消則導向綠界${d.testMode ? '測試' : ''}收銀台）`)) {
+      await api(`/api/orders/${d.orderId}/simulate`, {}); await refresh(); return flash('（開發模擬）付款完成，方案已開通。', 'ok');
+    }
+    const w = document.open('text/html', 'replace'); w.write(d.formHtml); w.close();
+  } catch (e) { flash(esc(e.message), 'bad'); }
+}
+
+function afterAuth() {
+  const next = safeNext();
+  if (next === '/tools/jingfang.html' && !me.tcmConsent) return render(), openDlg('dlgConsent');
+  if (next) return location.href = next;
+  render();
+}
+
+function renderNav() {
+  $('nav').innerHTML = me
+    ? `<span style="align-self:center">${esc(me.name)}${me.paid ? ' <span class="tag ok">付費會員</span>' : ''}</span>
+       <button class="ghost" onclick="location.hash='me'">會員中心</button>${me.role === 'admin' ? '<button class="ghost" onclick="location.hash=\'admin\'">後台</button>' : ''}
+       <button class="ghost" onclick="logout()">登出</button>`
+    : `<button class="ghost" onclick="openDlg('dlgLogin')">登入</button><button class="ghost" onclick="openDlg('dlgReg')">免費註冊</button>`;
+}
+async function renderMe() {
+  const s = $('me');
+  if (!me) return s.classList.add('hidden');
+  s.classList.remove('hidden');
+  const pct = Math.min(100, Math.round(me.aiUsedToday / Math.max(me.aiDailyLimit, 1) * 100));
+  const { orders } = await api('/api/orders/mine').catch(() => ({ orders: [] }));
+  s.innerHTML = `<h2>會員中心</h2><div class="grid">
+    <div class="card"><h3>方案</h3>
+      ${me.role === 'admin' ? '管理員（不限方案）' : me.paid ? `付費會員，到期日 <b>${fmtDate(me.planExpiresAt)}</b>` : '免費會員'}
+      <p class="muted">到期不自動續扣，續購會從原到期日往後延長。</p></div>
+    <div class="card"><h3>今日 AI 額度</h3>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <p>${me.aiUsedToday} / ${me.aiDailyLimit} 次 <span class="muted">（台灣時間 0 點重置；主機失敗的請求不扣次數）</span></p></div>
+    <div class="card"><h3>帳號</h3>
+      <p>${esc(me.email)} ${me.emailVerified ? '<span class="tag ok">已驗證</span>' : '<span class="tag">未驗證</span> <button class="ghost" onclick="resend()">重寄驗證信</button>'}</p>
+      <p>經方同意書：${me.tcmConsent ? '<span class="tag ok">已簽署</span>' : `<button class="ghost" onclick="openDlg('dlgConsent')">簽署</button>`}</p>
+      <button class="ghost" onclick="openDlg('dlgPw')">變更密碼</button></div>
+  </div>
+  ${orders.length ? `<h3>訂單紀錄</h3><div class="table-wrap"><table><tr><th>編號</th><th>方案</th><th>金額</th><th>狀態</th><th>建立</th></tr>
+    ${orders.map(o => `<tr><td>${esc(o.trade_no)}</td><td>${esc(o.item)}</td><td>NT$${o.amount}</td><td>${{ paid: '已付款', pending: '待付款', failed: '失敗' }[o.status] || esc(o.status)}</td><td>${fmtDate(o.created_at)}</td></tr>`).join('')}
+  </table></div>` : ''}`;
+}
+function renderPlans() {
+  if (!planInfo) return;
+  const free = `<div class="card"><h3>免費會員</h3><div class="price">NT$0</div>
+    <ul><li>全部排盤、起卦、辨證問診介面</li><li>AI 知識庫解讀每日 ${planInfo.freeDailyAi} 次</li></ul>
+    ${me ? '<span class="muted">您已是會員</span>' : `<button onclick="openDlg('dlgReg')">免費註冊</button>`}</div>`;
+  $('planCards').innerHTML = free + planInfo.plans.map(p => `<div class="card"><h3>${esc(p.name)}</h3>
+    <div class="price">NT$${p.price.toLocaleString()}</div><p class="muted">${p.days} 天${p.days >= 365 ? `，平均每月約 NT$${Math.round(p.price / 12)}` : ''}</p>
+    <ul><li>AI 知識庫解讀每日 ${planInfo.paidDailyAi} 次</li><li>經方、紫微、玄空、六爻全部工具</li></ul>
+    <button onclick="buy('${p.id}')">購買</button></div>`).join('');
+  $('planNote').textContent = (planInfo.testMode ? '目前為綠界測試環境，不會真的扣款。' : '付款由綠界科技處理，本站不經手信用卡資料。')
+    + (planInfo.kbConfigured ? '' : '（AI 知識庫主機尚未設定）');
+}
+async function renderAdmin() {
+  const s = $('admin');
+  if (!me || me.role !== 'admin') return s.classList.add('hidden');
+  s.classList.remove('hidden');
+  const st = await api('/api/admin/stats');
+  s.innerHTML = `<h2>管理後台</h2><div class="stats">
+    ${[['會員數', st.members], ['已驗證', st.verified], ['有效付費', st.paidActive], ['近 7 天新註冊', st.newLast7d], ['今日 AI 次數', st.aiCallsToday], ['本月 AI 次數', st.aiCallsMonth], ['本月營收', 'NT$' + st.revenueMonth.toLocaleString()], ['累計營收', 'NT$' + st.revenueTotal.toLocaleString()]]
+      .map(([k, v]) => `<div class="card"><span class="muted">${k}</span><b>${v}</b></div>`).join('')}</div>
+    <h3>會員</h3><input type="search" id="admQ" placeholder="搜尋姓名或 Email" oninput="clearTimeout(window._t);window._t=setTimeout(loadMembers,300)">
+    <div class="table-wrap" id="admMembers"></div>
+    <h3>訂單</h3><div class="table-wrap" id="admOrders"></div>`;
+  loadMembers();
+  const { orders } = await api('/api/admin/orders');
+  $('admOrders').innerHTML = `<table><tr><th>編號</th><th>會員</th><th>方案</th><th>金額</th><th>狀態</th><th>付款時間</th></tr>
+    ${orders.map(o => `<tr><td>${esc(o.trade_no)}</td><td>${esc(o.email)}</td><td>${esc(o.item)}</td><td>${o.amount}</td><td>${esc(o.status)}</td><td>${fmtDate(o.paid_at)}</td></tr>`).join('')}</table>`;
+}
+async function loadMembers() {
+  const { members } = await api('/api/admin/members?q=' + encodeURIComponent($('admQ')?.value || ''));
+  $('admMembers').innerHTML = `<table><tr><th>#</th><th>會員</th><th>方案</th><th>今日 AI</th><th>註冊</th><th>操作</th></tr>
+    ${members.map(m => `<tr><td>${m.id}</td><td>${esc(m.name)}<br><span class="muted">${esc(m.email)}${m.emailVerified ? '' : '（未驗證）'}</span></td>
+      <td>${m.role === 'admin' ? '管理員' : m.paid ? '至 ' + fmtDate(m.planExpiresAt) : '免費'}</td><td>${m.aiUsedToday}/${m.aiDailyLimit}</td><td>${fmtDate(m.createdAt)}</td>
+      <td>${m.role === 'admin' ? '' : `<button class="ghost" onclick="grant(${m.id})">調整天數</button>
+        <button class="ghost" onclick="suspend(${m.id},${!m.suspended})">${m.suspended ? '復權' : '停權'}</button>`}</td></tr>`).join('')}</table>`;
+}
+async function grant(id) {
+  const days = prompt('增加天數（負數為扣減，例如贈送 30 天輸入 30）'); if (!days) return;
+  const note = prompt('備註（例如：活動贈送、客訴補償）') || '';
+  try { await api(`/api/admin/members/${id}/grant`, { days: +days, note }); loadMembers(); } catch (e) { alert(e.message); }
+}
+async function suspend(id, on) {
+  const reason = on ? prompt('停權原因') : '復權'; if (on && !reason) return;
+  try { await api(`/api/admin/members/${id}/suspend`, { suspended: on, reason }); loadMembers(); } catch (e) { alert(e.message); }
+}
+
+async function refresh() { me = (await api('/api/me')).user; render(); }
+function render() { renderNav(); renderPlans(); renderMe(); renderAdmin(); }
+
+(async function init() {
+  planInfo = await api('/api/plans').catch(() => null);
+  await refresh();
+  const v = params.get('verified');
+  if (v === 'ok') flash('Email 驗證完成，感謝！', 'ok');
+  if (v === 'fail') flash('驗證連結無效或已過期，請登入後到會員中心重寄。', 'bad');
+  if (params.get('paid') === 'back') { flash('已從付款頁返回。付款成功的話，方案會在幾秒內開通（可重新整理查看）。', 'ok'); setTimeout(refresh, 3000); }
+  if (params.get('reset')) { resetToken = params.get('reset'); openDlg('dlgReset'); }
+  else if (params.get('login') && !me) { flash('請先登入或免費註冊，即可使用工具。'); openDlg('dlgLogin'); }
+  else if (params.get('consent') && me && !me.tcmConsent) openDlg('dlgConsent');
+  if (!params.get('next')) cleanUrl();
+})();
+</script>
+</body>
+</html>

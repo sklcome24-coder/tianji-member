@@ -1,0 +1,16 @@
+{
+  "name": "tianji-member",
+  "version": "0.1.0",
+  "private": true,
+  "description": "經方自學會員系統：會員、AI 額度、綠界付費，包住 tianji-platform 工具頁",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning server.js",
+    "sync-tools": "sh scripts/sync-tools.sh",
+    "test": "node --no-warnings=ExperimentalWarning --test test/*.test.js"
+  },
+  "engines": { "node": ">=22.13" },
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  }
+}
