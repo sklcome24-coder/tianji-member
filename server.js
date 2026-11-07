@@ -296,7 +296,7 @@ route('GET', '/api/admin/stats', async (req, res, body, user) => {
     members: one(`SELECT count(*) c FROM users WHERE role='member'`).c,
     verified: one(`SELECT count(*) c FROM users WHERE role='member' AND email_verified=1`).c,
     paidActive: one(`SELECT count(*) c FROM users WHERE role='member' AND plan_expires_at>?`, now).c,
-    newLast7d: one(`SELECT count(*) c FROM users WHERE created_at>?`, new Date(Date.now() - 7 * 86400e3).toISOString()).c,
+    newLast7d: one(`SELECT count(*) c FROM users WHERE role='member' AND created_at>?`, new Date(Date.now() - 7 * 86400e3).toISOString()).c,
     aiCallsToday: one(`SELECT coalesce(sum(n),0) c FROM usage WHERE day=?`, taipeiDay()).c,
     aiCallsMonth: one(`SELECT coalesce(sum(n),0) c FROM usage WHERE day>=?`, monthStart).c,
     revenueMonth: one(`SELECT coalesce(sum(amount),0) c FROM orders WHERE status='paid' AND paid_at>=?`, monthStart).c,
