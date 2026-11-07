@@ -2,7 +2,7 @@
   "name": "tianji-member",
   "version": "0.1.0",
   "private": true,
-  "description": "經方自學會員系統：會員、AI 額度、綠界付費，包住 tianji-platform 工具頁",
+  "description": "自學中醫、紫微斗數、梅花易數、六爻卜卦、玄空飛星 應用學習平台：會員、AI 額度、綠界付費，包住 tianji-platform 工具頁",
   "main": "server.js",
   "scripts": {
     "start": "node --no-warnings=ExperimentalWarning server.js",

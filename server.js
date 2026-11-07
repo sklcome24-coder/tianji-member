@@ -1,5 +1,5 @@
 'use strict';
-// 經方自學會員系統：會員、每日 AI 額度、綠界付費方案，並把 tianji-platform 的工具頁放在登入之後。
+// 自學中醫、紫微斗數、梅花易數、六爻卜卦、玄空飛星 應用學習平台：會員、每日 AI 額度、綠界付費方案，並把 tianji-platform 的工具頁放在登入之後。
 // 工具頁原封不動：它們連不到 127.0.0.1:8765 時會讀 backend.json，本站回 {"api":"/kb"}，
 // AI 請求就走本站的 /kb 代理——在這裡驗會員、扣額度，再換上後端金鑰轉給知識庫主機。
 const http = require('http');
@@ -332,6 +332,18 @@ route('GET', '/api/admin/orders', async (req, res, body, user) => {
   json(res, 200, { orders: all(`SELECT o.id,o.trade_no,o.item,o.amount,o.status,o.created_at,o.paid_at,u.email
     FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.id DESC LIMIT 100`) });
 });
+// 寄信自檢：即時回報 SMTP 實際結果。回 250 不代表進收件匣，Gmail 自寄自收常被歸檔或進垃圾匣
+route('POST', '/api/admin/test-mail', async (req, res, body, user) => {
+  if (!requireAdmin(user, res)) return;
+  try {
+    const r = await mailer.send(user.email, `【系統自檢】SMTP 測試 ${new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })}`,
+      '<p>這是會員站寄信功能自檢信，收到代表 SMTP 正常。</p>');
+    audit('mail.test', user.id, 'SMTP 自檢成功');
+    json(res, 200, { ok: true, detail: r.response || 'dev mode', smtp: mailer.hasSmtp });
+  } catch (e) {
+    json(res, 500, { error: 'SMTP 寄送失敗：' + e.message, smtp: mailer.hasSmtp });
+  }
+});
 route('GET', '/api/admin/audit', async (req, res, body, user) => {
   if (!requireAdmin(user, res)) return;
   json(res, 200, { audit: all(`SELECT * FROM audit ORDER BY id DESC LIMIT 200`) });
@@ -343,10 +355,34 @@ route('GET', '/api/admin/audit', async (req, res, body, user) => {
 function kbNotice(res, message, code) {
   json(res, 200, { error: { code, message }, candidates: [{ content: { parts: [{ text: message }] } }], notice: true });
 }
-const KB_PATHS = new Set(['/gemini', '/tianji']);
+// 路徑 → 允許的方法。方法要鎖死：知識庫的 GET /xuankong 是帶主密語的 app 頁，不能轉給會員。
+// 六爻、玄空 app 以 location.origin 當後端，所以這些路徑在根目錄也走代理（見 server）。
+const KB_ROUTES = {
+  '/gemini': 'POST', '/tianji': 'GET', '/xuankong': 'POST', '/xuankong/yinzheng': 'POST',
+  '/xuankong/status': 'GET', '/xuankong/result': 'GET',
+};
+const KB_METERED = new Set(['/gemini', '/xuankong']); // 玄空報告一份算一次
 const inflight = new Map();
+// 玄空報告是非同步：POST 只拿到工作編號，失敗要到查進度才知道，所以記下編號，失敗時才退得回額度。
+// ponytail: 只存記憶體，網站重啟或會員中途關頁就退不回；要保證退回時改存資料庫，由伺服器自己查進度。
+const xkJobs = new Map(); // 工作編號 → { user, day }
+function trackXkJob(url, sub, user, day, buf) {
+  let d;
+  try { d = JSON.parse(buf); } catch { return buf; }
+  if (sub === '/xuankong') { if (d.id) xkJobs.set(d.id, { user, day }); return buf; }
+  const id = url.searchParams.get('id');
+  const job = xkJobs.get(id);
+  if (!job) return buf;
+  if (d.error || d.done) xkJobs.delete(id);
+  if (!d.error) return buf;
+  refundQuota(job.user, job.day); // 知識庫重啟後回「查無此工作」也算失敗
+  // 原始訊息是程式錯誤（含主機路徑），留在知識庫日誌，不給會員看
+  return Buffer.from(JSON.stringify({ ...d, error: '報告沒有產生成功，本次不扣額度。請確認資料填寫完整後再試一次。' }));
+}
 async function kbProxy(req, res, url, user) {
-  const sub = url.pathname.slice(3); // 去掉 /kb
+  const sub = url.pathname.startsWith('/kb/') ? url.pathname.slice(3) : url.pathname;
+  // 玄空 app 讀的是字串 error；其他工具讀 Gemini 形狀
+  const notice = sub.startsWith('/xuankong') ? (msg, code) => json(res, code, { error: msg }) : (msg, code) => kbNotice(res, msg, code);
   if (sub === '/health') {
     if (!KB_BACKEND_URL) return json(res, 200, { ok: false, reason: 'not_configured' });
     try {
@@ -355,23 +391,23 @@ async function kbProxy(req, res, url, user) {
       return json(res, 200, { ok: !!d.ok, model: d.model });
     } catch { return json(res, 200, { ok: false }); }
   }
-  if (!KB_PATHS.has(sub)) return json(res, 404, { error: { message: 'Not found' } });
-  if (!user) return kbNotice(res, '請先登入會員才能使用 AI 知識庫。', 401);
-  if (!KB_BACKEND_URL) return kbNotice(res, '知識庫主機尚未設定，請稍後再試。', 503);
+  if (KB_ROUTES[sub] !== req.method) return json(res, 404, { error: { message: 'Not found' } });
+  if (!user) return notice('請先登入會員才能使用 AI 知識庫。', 401);
+  if (!KB_BACKEND_URL) return notice('知識庫主機尚未設定，請稍後再試。', 503);
   const tcm = url.searchParams.get('domain') === 'tcm';
-  if (tcm && !user.tcm_consent_at) return kbNotice(res, '使用經方辨證前，請先回會員中心簽署學習用途同意書。', 403);
+  if (tcm && !user.tcm_consent_at) return notice('使用經方辨證前，請先回會員中心簽署學習用途同意書。', 403);
 
-  // /tianji 只是查原著段落，不計 AI 額度；/gemini 才計
-  const metered = sub === '/gemini';
+  // /tianji 只是查原著段落、玄空的驗盤與查進度也不用模型，都不計 AI 額度
+  const metered = KB_METERED.has(sub);
   let day = null;
   if (metered) {
-    if ((inflight.get(user.id) || 0) >= 2) return kbNotice(res, '上一個問題還在分析中，請等它完成再送出。', 429);
+    if ((inflight.get(user.id) || 0) >= 2) return notice('上一個問題還在分析中，請等它完成再送出。', 429);
     day = reserveQuota(user);
     if (!day) {
       const msg = isPaid(user)
         ? `今日 AI 額度（${PAID_DAILY_AI} 次）已用完，明天（台灣時間 0 點）自動恢復。`
         : `免費會員每日可用 ${FREE_DAILY_AI} 次 AI 解讀，今日已用完。升級付費會員每日可用 ${PAID_DAILY_AI} 次：${BASE_URL}/#plans`;
-      return kbNotice(res, msg, 402);
+      return notice(msg, 402);
     }
     inflight.set(user.id, (inflight.get(user.id) || 0) + 1);
   }
@@ -386,14 +422,15 @@ async function kbProxy(req, res, url, user) {
       headers: { 'Content-Type': req.headers['content-type'] || 'application/json' },
       signal: AbortSignal.timeout(250e3),
     });
-    const buf = Buffer.from(await r.arrayBuffer());
+    let buf = Buffer.from(await r.arrayBuffer());
     ok = r.ok;
+    if (sub === '/xuankong' || sub === '/xuankong/status') buf = trackXkJob(url, sub, user, day, buf);
     res.writeHead(r.status, { 'Content-Type': r.headers.get('content-type') || 'application/json', 'Cache-Control': 'no-store' });
     res.end(buf);
   } catch (e) {
-    if (e.code === 413) return kbNotice(res, '上傳內容過大，請縮小圖片後再試。', 413);
+    if (e.code === 413) return notice('上傳內容過大，請縮小圖片後再試。', 413);
     console.error('知識庫轉送失敗:', e.message); // 不記錄請求內容（可能含病況描述）
-    kbNotice(res, '知識庫主機暫時連不上，本次不扣額度，請稍後再試。', 502);
+    notice('知識庫主機暫時連不上，本次不扣額度，請稍後再試。', 502);
   } finally {
     if (metered) {
       inflight.set(user.id, Math.max((inflight.get(user.id) || 1) - 1, 0));
@@ -410,6 +447,51 @@ function sendFile(res, file, extraHeaders = {}) {
     res.end(data);
   });
 }
+// 六爻、玄空的 tianji-platform 頁只是轉址頁，完整 app 在知識庫主機上（原始檔不進公開 repo）
+const KB_APPS = { 'liuyao.html': '/liuyao', 'xuankong.html': '/xuankong' };
+// 這兩頁的原檔寫給站長自用，轉給會員時換掉只對站長成立的字樣。知識庫原檔改字時，網站日誌會出現警告。
+// app 有 token 才會送出請求，真正的金鑰由 kbProxy 換上，所以頁面裡只放占位字 member。
+const KB_HOST = '本平台的知識庫主機';
+const KB_APP_PATCHES = {
+  '/liuyao': [
+    ["var MEM_TOK = ''", "var MEM_TOK = 'member'"],
+    ['<button onclick="askToken()" style="padding', '<button onclick="askToken()" style="display:none;padding'], // 「設定」只用來填密語
+    ['送到你自己 Mac 上的後端(本機優先,連不上改走已發佈的隧道),由 Gemini 串成白話詳解', `送到${KB_HOST},由 Google 的 AI 模型串成白話詳解`],
+    ['需通行密語(右上角「設定」,終端機 <b>cat ~/.rag_token</b> 取得)。', '需登入會員,每次詳解計入每日 AI 額度。'],
+    [',連後端位址都不會去查', ''],
+    ['師說原文送到你自己 Mac 上的後端,', `師說原文送到${KB_HOST},`],
+    ['經由你自己 Mac 上的後端產生', `經由${KB_HOST}產生`],
+    ['【需要通行密語】請按右上角「設定」填入密語,或密語已失效。', '【暫時無法使用】知識庫主機拒絕連線,請稍後再試。'],
+    ['(隧道約 100 秒切線)', ''],
+    ['【連不上後端】隧道或本機服務沒有回應。', '【連不上主機】知識庫主機沒有回應,請稍後再試。'],
+  ],
+  '/xuankong': [
+    ['var STAMPED_TOKEN = "__RAG_TOKEN__"', 'var STAMPED_TOKEN = "member"'],
+    ['需通行密語，不扣報告額度。', '不扣報告額度。'],
+    ['完成後就在本頁顯示。需通行密語。', '完成後就在本頁顯示。每份計入每日 AI 額度,產生失敗會退回。'],
+    ['<input id="tok" placeholder="通行密語"', '<input id="tok" type="hidden" placeholder="通行密語"'],
+    ['分析伺服器已就緒,密語" + (tok() ? "已填,可以按「產生報告」。" : "未填,請先填入通行密語。")', '分析伺服器已就緒,可以按「產生報告」。"'],
+  ],
+};
+async function serveKbApp(res, route) {
+  if (!KB_BACKEND_URL) return json(res, 503, { error: '知識庫主機尚未設定，請稍後再試' });
+  try {
+    const r = await fetch(KB_BACKEND_URL + route, { signal: AbortSignal.timeout(10e3) });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    // 知識庫預設會把主密語種在頁首（XK_SEED_TOKEN），絕不能轉給會員；另加一道檢查防格式改變
+    let html = (await r.text()).replace(/^<script>try\{\["liuyao\.token".*?<\/script>\n/s, '');
+    if (KB_BACKEND_KEY && html.includes(KB_BACKEND_KEY)) throw new Error('頁面含後端金鑰，拒絕轉送');
+    for (const [from, to] of KB_APP_PATCHES[route]) {
+      if (!html.includes(from)) console.warn('工具頁原文已變動，請更新 KB_APP_PATCHES：', from);
+      html = html.replaceAll(from, to);
+    }
+    res.writeHead(200, { 'Content-Type': MIME['.html'], 'Cache-Control': 'no-store' });
+    res.end(html);
+  } catch (e) {
+    console.error('工具頁取得失敗:', e.message);
+    json(res, 502, { error: '知識庫主機暫時連不上，請稍後再試' });
+  }
+}
 function serveTool(req, res, url, user) {
   let rel;
   try { rel = decodeURIComponent(url.pathname.slice('/tools/'.length)); } catch { rel = ''; }
@@ -423,6 +505,7 @@ function serveTool(req, res, url, user) {
     const next = encodeURIComponent('/tools/' + rel);
     if (!user) return redirect(res, `/?login=1&next=${next}`);
     if (CONSENT_PAGES.has(rel) && !user.tcm_consent_at) return redirect(res, `/?consent=1&next=${next}`);
+    if (KB_APPS[rel]) return serveKbApp(res, KB_APPS[rel]);
     return sendFile(res, file, { 'Cache-Control': 'no-store' });
   }
   if (!TOOL_STATIC_EXT.has(ext) || rel.startsWith('references/') || rel.startsWith('engine/'))
@@ -439,8 +522,9 @@ const server = http.createServer(async (req, res) => {
   try {
     if (url.pathname === '/healthz') return json(res, 200, { ok: true });
     const user = getSession(req);
-    if (url.pathname.startsWith('/kb/')) return await kbProxy(req, res, url, user);
-    if (url.pathname.startsWith('/tools/')) return serveTool(req, res, url, user);
+    if (url.pathname.startsWith('/kb/') || url.pathname === '/health' || KB_ROUTES[url.pathname])
+      return await kbProxy(req, res, url, user);
+    if (url.pathname.startsWith('/tools/')) return await serveTool(req, res, url, user);
     if (url.pathname.startsWith('/api/')) {
       // 擋跨站表單偽造：除綠界回調外，POST 一律要 JSON（跨站表單送不出這個標頭）
       if (req.method === 'POST' && url.pathname !== '/api/ecpay/return'
@@ -475,4 +559,4 @@ if (require.main === module) {
   if (IS_PROD && payment.IS_TEST_MERCHANT) console.warn('⚠ 正式環境仍使用綠界測試商店，無法真實收款');
   server.listen(PORT, () => console.log(`${SITE_NAME} 已啟動：${BASE_URL}`));
 }
-module.exports = { server, PLANS };
+module.exports = { server, PLANS, KB_APP_PATCHES };

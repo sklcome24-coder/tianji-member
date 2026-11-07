@@ -9,7 +9,7 @@ rm -rf tools.tmp
 git clone --depth 1 --branch "$REF" "$REPO" tools.tmp
 # 只保留工具頁與前端資源；Python 腳本、參考底本、部署腳本不放上會員站
 mkdir -p tools.new
-cp tools.tmp/ziwei.html tools.tmp/liuyao.html tools.tmp/xuankong.html tools.tmp/jingfang.html tools.new/
+cp tools.tmp/ziwei.html tools.tmp/jingfang.html tools.new/  # 六爻、玄空的頁是轉址頁，會員站改向知識庫主機取完整 app
 cp tools.tmp/apple-touch-icon*.png tools.new/ 2>/dev/null || true
 cp -R tools.tmp/assets tools.new/assets
 rm -rf tools tools.tmp

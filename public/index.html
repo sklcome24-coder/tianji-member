@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>經方自學會員</title>
+<title>自學中醫、紫微斗數、梅花易數、六爻卜卦、玄空飛星 應用學習平台</title>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
 :root{--bg:#faf8f5;--card:#fff;--ink:#292524;--muted:#78716c;--line:#e7e5e4;--brand:#7c2d12;--brand2:#9a3412;--ok:#166534;--warn:#b45309;--bad:#b91c1c}
@@ -13,7 +13,8 @@ a{color:var(--brand2)}
 header{background:var(--brand);color:#fff}
 .wrap{max-width:980px;margin:0 auto;padding:0 16px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;padding-bottom:12px;flex-wrap:wrap}
-.top h1{font-size:20px;margin:0;letter-spacing:2px}
+.top h1{font-size:clamp(15px,4.2vw,20px);line-height:1.5;margin:0;letter-spacing:1px}
+.nowrap{white-space:nowrap}
 .top nav{display:flex;gap:8px;flex-wrap:wrap}
 button,.btn{font:inherit;border:1px solid var(--brand);background:var(--brand);color:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;text-decoration:none;display:inline-block}
 button.ghost,.btn.ghost{background:transparent;color:var(--brand)}
@@ -42,6 +43,8 @@ input[type=text],input[type=email],input[type=password],input[type=number],input
 .check input{margin-top:6px}
 .row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
 .err{color:var(--bad);font-size:13px;min-height:1em;margin-top:6px}
+.err:not(:empty){font-size:15px;font-weight:700;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 10px}
+.busy dialog button{opacity:.5;pointer-events:none}
 .bar{height:8px;background:#e7e5e4;border-radius:99px;overflow:hidden}
 .bar>i{display:block;height:100%;background:var(--brand2)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
@@ -53,7 +56,7 @@ footer{border-top:1px solid var(--line);margin-top:40px;padding:20px 0 40px;font
 </head>
 <body>
 <header><div class="wrap top">
-  <h1>經方自學會員</h1>
+  <h1>自學中醫、紫微斗數、梅花易數、<span class="nowrap">六爻卜卦</span>、<span class="nowrap">玄空飛星</span> <span class="nowrap">應用學習平台</span></h1>
   <nav id="nav"></nav>
 </div></header>
 
@@ -115,7 +118,7 @@ footer{border-top:1px solid var(--line);margin-top:40px;padding:20px 0 40px;font
   <label>稱呼</label><input type="text" id="rgName" maxlength="40">
   <label>Email</label><input type="email" id="rgEmail" autocomplete="email">
   <label>密碼（至少 8 碼，含英文與數字）</label><input type="password" id="rgPw" autocomplete="new-password">
-  <div class="check"><input type="checkbox" id="rgAgree"><span>我已閱讀並同意<a href="#terms" onclick="closeAll()">服務條款</a>，了解本站為學習用途，不提供醫療診斷。</span></div>
+  <label class="check"><input type="checkbox" id="rgAgree"><span>我已閱讀並同意<a href="#terms" onclick="closeAll()">服務條款</a>，了解本站為學習用途，不提供醫療診斷。</span></label>
   <div class="err" id="rgErr"></div>
   <div class="row"><button class="ghost" type="button" onclick="closeAll()">取消</button><button type="button" onclick="doRegister()">註冊</button></div>
 </form></dialog>
@@ -138,9 +141,9 @@ footer{border-top:1px solid var(--line);margin-top:40px;padding:20px 0 40px;font
 <dialog id="dlgConsent"><form method="dialog" onsubmit="return false">
   <h3>經方辨證・學習用途同意書</h3>
   <p class="muted">使用經方辨證工具前，請逐項確認：</p>
-  <div class="check"><input type="checkbox" id="cs1"><span>我了解本工具為<b>經方教學輔助</b>，不是醫療行為，AI 回覆不是診斷或處方。</span></div>
-  <div class="check"><input type="checkbox" id="cs2"><span>任何用藥我會先請<b>合格中醫師</b>當面診察確認；孕婦、慢性病、服用西藥者會主動告知醫師。</span></div>
-  <div class="check"><input type="checkbox" id="cs3"><span>遇到胸痛、呼吸困難、中風徵兆、高燒不退等急症，我會<b>直接就醫或撥打 119</b>，不使用本工具代替。</span></div>
+  <label class="check"><input type="checkbox" id="cs1"><span>我了解本工具為<b>經方教學輔助</b>，不是醫療行為，AI 回覆不是診斷或處方。</span></label>
+  <label class="check"><input type="checkbox" id="cs2"><span>任何用藥我會先請<b>合格中醫師</b>當面診察確認；孕婦、慢性病、服用西藥者會主動告知醫師。</span></label>
+  <label class="check"><input type="checkbox" id="cs3"><span>遇到胸痛、呼吸困難、中風徵兆、高燒不退等急症，我會<b>直接就醫或撥打 119</b>，不使用本工具代替。</span></label>
   <div class="err" id="csErr"></div>
   <div class="row"><button class="ghost" type="button" onclick="closeAll()">取消</button><button type="button" onclick="doConsent()">同意並進入</button></div>
 </form></dialog>
@@ -162,10 +165,16 @@ let me = null, planInfo = null, resetToken = null;
 
 async function api(path, body) {
   const opt = body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
-  const r = await fetch(path, opt);
-  const d = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(d.error || '發生錯誤，請稍後再試');
-  return d;
+  if (body !== undefined) { // 送出要看得到反應：同一個錯誤再出現一次，畫面也要有變化
+    document.querySelectorAll('.err').forEach(e => { e.textContent = ''; });
+    document.body.classList.add('busy');
+  }
+  try {
+    const r = await fetch(path, opt);
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || '發生錯誤，請稍後再試');
+    return d;
+  } finally { document.body.classList.remove('busy'); }
 }
 function flash(msg, kind = '') { $('flash').innerHTML = `<div class="notice ${kind}">${msg}</div>`; }
 function openDlg(id) { closeAll(); const d = $(id); d.showModal(); const f = d.querySelector('input'); if (f) f.focus(); }
@@ -278,6 +287,7 @@ async function renderAdmin() {
   s.innerHTML = `<h2>管理後台</h2><div class="stats">
     ${[['會員數', st.members], ['已驗證', st.verified], ['有效付費', st.paidActive], ['近 7 天新註冊', st.newLast7d], ['今日 AI 次數', st.aiCallsToday], ['本月 AI 次數', st.aiCallsMonth], ['本月營收', 'NT$' + st.revenueMonth.toLocaleString()], ['累計營收', 'NT$' + st.revenueTotal.toLocaleString()]]
       .map(([k, v]) => `<div class="card"><span class="muted">${k}</span><b>${v}</b></div>`).join('')}</div>
+    <p><button class="ghost" onclick="testMail()">寄測試信</button> <span class="muted" id="admMail"></span></p>
     <h3>會員</h3><input type="search" id="admQ" placeholder="搜尋姓名或 Email" oninput="clearTimeout(window._t);window._t=setTimeout(loadMembers,300)">
     <div class="table-wrap" id="admMembers"></div>
     <h3>訂單</h3><div class="table-wrap" id="admOrders"></div>`;
@@ -293,6 +303,13 @@ async function loadMembers() {
       <td>${m.role === 'admin' ? '管理員' : m.paid ? '至 ' + fmtDate(m.planExpiresAt) : '免費'}</td><td>${m.aiUsedToday}/${m.aiDailyLimit}</td><td>${fmtDate(m.createdAt)}</td>
       <td>${m.role === 'admin' ? '' : `<button class="ghost" onclick="grant(${m.id})">調整天數</button>
         <button class="ghost" onclick="suspend(${m.id},${!m.suspended})">${m.suspended ? '復權' : '停權'}</button>`}</td></tr>`).join('')}</table>`;
+}
+async function testMail() {
+  const s = $('admMail'); s.textContent = '寄送中…';
+  try {
+    const d = await api('/api/admin/test-mail', {});
+    s.textContent = d.smtp ? `已寄到 ${me.email}，沒看到請查垃圾郵件匣和「所有郵件」` : '尚未設定 SMTP，信只印在伺服器日誌';
+  } catch (e) { s.textContent = e.message; }
 }
 async function grant(id) {
   const days = prompt('增加天數（負數為扣減，例如贈送 30 天輸入 30）'); if (!days) return;

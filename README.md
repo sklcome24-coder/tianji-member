@@ -1,4 +1,4 @@
-# 經方自學會員系統
+# 自學中醫、紫微斗數、梅花易數、六爻卜卦、玄空飛星 應用學習平台
 
 把 [tianji-platform](https://github.com/sklcome24-coder/tianji-platform) 的四套工具（經方辨證、天紀紫微・易卦、玄空星卦合參、六爻禪解）放到會員制之後，加上：
 

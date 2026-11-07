@@ -20,6 +20,12 @@ const kb = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
   seen.push({ path: u.pathname, key: u.searchParams.get('key'), domain: u.searchParams.get('domain') });
   if (u.pathname === '/health') return res.end(JSON.stringify({ ok: true, model: 'fake' }));
+  if (req.method === 'GET' && (u.pathname === '/liuyao' || u.pathname === '/xuankong')) { // 與真主機相同：頁首種主密語，內文是站長自用字樣
+    const stale = require('../server').KB_APP_PATCHES[u.pathname].map(p => p[0]).join('\n');
+    return res.end(`<script>try{["liuyao.token","xuankong.token"].forEach(function(k){localStorage.setItem(k,"server-secret")})}catch(e){}</script>\n<html>${u.pathname}</html>\n${stale}`);
+  }
+  if (req.method === 'POST' && u.pathname === '/xuankong') return res.end(JSON.stringify({ id: u.searchParams.get('job') || 'job1' }));
+  if (u.pathname === '/xuankong/status') return res.end(JSON.stringify(u.searchParams.get('id') === 'bad' ? { done: true, error: '撰述超出篇幅上限' } : { done: true }));
   if (u.searchParams.get('fail')) { res.writeHead(500); return res.end('{}'); }
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] }));
@@ -148,15 +154,66 @@ test('後台：一般會員進不去；管理員可看統計、贈送天數、�
   const m = client();
   await m('/api/login', { body: { email: 'a@test.tw', password: 'abc12345' } });
   assert.equal((await m('/api/admin/stats')).status, 403);
+  assert.equal((await m('/api/admin/test-mail', { body: {} })).status, 403);
 
   const a = client();
   assert.equal((await a('/api/login', { body: { email: 'admin@test.tw', password: 'admin-password-123' } })).status, 200);
   const st = (await a('/api/admin/stats')).data;
   assert.equal(st.members, 1);
   assert.equal(st.revenueTotal, 299);
+  assert.equal((await a('/api/admin/test-mail', { body: {} })).data.smtp, false, '未設定 SMTP 時走開發模式');
   const { members } = (await a('/api/admin/members?q=a@')).data;
   const id = members.find(x => x.email === 'a@test.tw').id;
   assert.equal((await a(`/api/admin/members/${id}/grant`, { body: { days: 30, note: '測試' } })).status, 200);
   assert.equal((await a(`/api/admin/members/${id}/suspend`, { body: { suspended: true, reason: '測試' } })).status, 200);
   assert.equal((await m('/api/me')).data.user, null, '停權後 session 立即失效');
+});
+
+test('玄空、六爻：app 由知識庫供檔但不外露主密語，API 走根路徑並計額度', async () => {
+  const anon = client();
+  assert.equal((await anon('/tools/liuyao.html')).status, 302);
+  assert.equal((await anon('/gemini?domain=liuyao', { body: { contents: [] } })).data.error.code, 401);
+  assert.equal((await anon('/xuankong/status?id=job1')).status, 401);
+  assert.equal((await anon('/health')).data.ok, true);
+
+  const c = client();
+  await c('/api/register', { body: { name: '小華', email: 'b@test.tw', password: 'abc12345', agreeTerms: true } });
+  for (const name of ['liuyao', 'xuankong']) {
+    const r = await c(`/tools/${name}.html`);
+    assert.equal(r.status, 200);
+    assert.match(r.data, new RegExp(`<html>/${name}</html>`));
+    assert.doesNotMatch(r.data, /server-secret/, '主密語不得轉給會員');
+    for (const [from, to] of require('../server').KB_APP_PATCHES[`/${name}`]) {
+      assert.ok(!r.data.includes(from), `會員不該看到：${from}`);
+      assert.ok(r.data.includes(to), `要換成：${to}`);
+    }
+  }
+  // 直接 GET 知識庫的 app 路徑會帶到主密語，一律不轉
+  for (const p of ['/xuankong', '/kb/xuankong', '/kb/liuyao', '/liuyao']) {
+    const r = await c(p);
+    assert.equal(r.status, 404, p);
+    assert.doesNotMatch(JSON.stringify(r.data), /server-secret/);
+  }
+
+  seen.length = 0;
+  const g = await c('/gemini?key=member&domain=liuyao', { body: { contents: [] } });
+  assert.equal(g.data.candidates[0].content.parts[0].text, 'ok');
+  assert.equal(seen[0].key, 'server-secret', '占位 token 要換成伺服器金鑰');
+  assert.equal((await c('/api/me')).data.user.aiUsedToday, 1);
+
+  // 報告送出後才失敗：查進度看到錯誤要退回次數，重複查不重複退
+  assert.equal((await c('/xuankong?key=member&job=bad', { body: {} })).data.id, 'bad');
+  assert.equal((await c('/api/me')).data.user.aiUsedToday, 2);
+  assert.match((await c('/xuankong/status?id=bad')).data.error, /本次不扣額度/);
+  assert.equal((await c('/api/me')).data.user.aiUsedToday, 1, '失敗的報告要退回');
+  await c('/xuankong/status?id=bad');
+  assert.equal((await c('/api/me')).data.user.aiUsedToday, 1, '重複查進度不重複退');
+
+  assert.equal((await c('/xuankong?key=member', { body: {} })).data.id, 'job1');
+  assert.equal((await c('/api/me')).data.user.aiUsedToday, 2, '玄空報告也計額度');
+  const over = await c('/xuankong?key=member', { body: {} });
+  assert.equal(over.status, 402);
+  assert.match(over.data.error, /今日已用完/, '玄空 app 讀字串 error');
+  assert.equal((await c('/xuankong/status?id=job1')).status, 200);
+  assert.equal((await c('/api/me')).data.user.aiUsedToday, 2, '成功的報告不退');
 });
